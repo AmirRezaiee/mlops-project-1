@@ -27,18 +27,6 @@ class InputData(BaseModel):
 # =========================
 # API Endpoint
 # =========================
-@app.post("/predict")
-def predict_api(data: InputData):
-    features = np.array([[
-        data.MedInc,
-        data.HouseAge,
-        data.AveRooms,
-        data.AveBedrms,
-        data.Population,
-        data.AveOccup,
-        data.Latitude,
-        data.Longitude
-    ]])
 
     prediction = model.predict(features)[0]
 
