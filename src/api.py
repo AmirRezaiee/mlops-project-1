@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Form
+from fastapi import FastAPI
 from fastapi.responses import HTMLResponse
 from pydantic import BaseModel
 import joblib
@@ -11,7 +11,7 @@ model = joblib.load("models/model.pkl")
 
 
 # =========================
-# JSON Input (API)
+# API Input (JSON)
 # =========================
 class InputData(BaseModel):
     MedInc: float
@@ -25,95 +25,7 @@ class InputData(BaseModel):
 
 
 # =========================
-# UI (HTML Form)
-# =========================
-@app.get("/", response_class=HTMLResponse)
-def form():
-    return """
-    <html>
-    <head>
-        <title>House Price Prediction</title>
-        <style>
-            body {
-                font-family: Arial;
-                background-color: #f4f6f8;
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                height: 100vh;
-            }
-
-            .container {
-                background: white;
-                padding: 30px;
-                border-radius: 10px;
-                box-shadow: 0px 0px 15px rgba(0,0,0,0.1);
-                width: 350px;
-            }
-
-            h2 {
-                text-align: center;
-                margin-bottom: 20px;
-            }
-
-            input {
-                width: 100%;
-                padding: 8px;
-                margin: 5px 0 15px 0;
-                border: 1px solid #ccc;
-                border-radius: 5px;
-            }
-
-            button {
-                width: 100%;
-                padding: 10px;
-                background-color: #007BFF;
-                color: white;
-                border: none;
-                border-radius: 5px;
-                cursor: pointer;
-                font-size: 16px;
-            }
-
-            button:hover {
-                background-color: #0056b3;
-            }
-
-            .result {
-                margin-top: 20px;
-                padding: 10px;
-                background-color: #e6f7ff;
-                border-radius: 5px;
-                text-align: center;
-                font-weight: bold;
-            }
-        </style>
-    </head>
-
-    <body>
-        <div class="container">
-            <h2>House Price Prediction</h2>
-
-            <form action="/predict-form" method="post">
-                <input type="text" name="MedInc" placeholder="Median Income">
-                <input type="text" name="HouseAge" placeholder="House Age">
-                <input type="text" name="AveRooms" placeholder="Average Rooms">
-                <input type="text" name="AveBedrms" placeholder="Average Bedrooms">
-                <input type="text" name="Population" placeholder="Population">
-                <input type="text" name="AveOccup" placeholder="Average Occupancy">
-                <input type="text" name="Latitude" placeholder="Latitude">
-                <input type="text" name="Longitude" placeholder="Longitude">
-
-                <button type="submit">Predict</button>
-            </form>
-        </div>
-    </body>
-    </html>
-    """
-
-
-# =========================
-# API (JSON)
+# API Endpoint
 # =========================
 @app.post("/predict")
 def predict_api(data: InputData):
@@ -130,7 +42,7 @@ def predict_api(data: InputData):
 
     prediction = model.predict(features)[0]
 
-    # جلوگیری از منفی
+    # جلوگیری از مقدار منفی
     prediction = max(0, prediction)
 
     return {
@@ -139,37 +51,147 @@ def predict_api(data: InputData):
 
 
 # =========================
-# Form Handler (UI)
+# UI Level 2 (Frontend)
 # =========================
-@app.post("/predict-form", response_class=HTMLResponse)
-def predict_form(
-    MedInc: float = Form(...),
-    HouseAge: float = Form(...),
-    AveRooms: float = Form(...),
-    AveBedrms: float = Form(...),
-    Population: float = Form(...),
-    AveOccup: float = Form(...),
-    Latitude: float = Form(...),
-    Longitude: float = Form(...)
-):
-    features = np.array([[MedInc, HouseAge, AveRooms, AveBedrms,
-                          Population, AveOccup, Latitude, Longitude]])
-
-    prediction = model.predict(features)[0]
-
-    # جلوگیری از منفی
-    prediction = max(0, prediction)
-
-    return f"""
+@app.get("/", response_class=HTMLResponse)
+def form():
+    return """
     <html>
-    <body style="font-family: Arial; background:#f4f6f8; display:flex; justify-content:center; align-items:center; height:100vh;">
-        <div style="background:white; padding:30px; border-radius:10px; box-shadow:0px 0px 15px rgba(0,0,0,0.1); text-align:center;">
-            <h2>Prediction Result</h2>
-            <p style="font-size:18px;">Predicted House Value:</p>
-            <p style="font-size:24px; color:#007BFF;">{prediction}</p>
-            <br>
-            <a href="/" style="text-decoration:none; color:white; background:#007BFF; padding:10px 20px; border-radius:5px;">Back</a>
+    <head>
+        <title>House Price Predictor</title>
+
+        <style>
+            body {
+                font-family: Arial;
+                background: linear-gradient(135deg, #667eea, #764ba2);
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                height: 100vh;
+                margin: 0;
+            }
+
+            .card {
+                background: white;
+                padding: 30px;
+                border-radius: 12px;
+                width: 360px;
+                box-shadow: 0px 10px 30px rgba(0,0,0,0.25);
+            }
+
+            h2 {
+                text-align: center;
+                margin-bottom: 20px;
+            }
+
+            input {
+                width: 100%;
+                padding: 10px;
+                margin: 6px 0;
+                border-radius: 6px;
+                border: 1px solid #ccc;
+            }
+
+            button {
+                width: 100%;
+                padding: 12px;
+                margin-top: 10px;
+                background: #667eea;
+                color: white;
+                border: none;
+                border-radius: 6px;
+                cursor: pointer;
+                font-size: 16px;
+            }
+
+            button:hover {
+                background: #5a67d8;
+            }
+
+            #result {
+                margin-top: 15px;
+                padding: 10px;
+                text-align: center;
+                font-weight: bold;
+                border-radius: 6px;
+            }
+
+            .success {
+                background: #d4edda;
+                color: #155724;
+            }
+
+            .error {
+                background: #f8d7da;
+                color: #721c24;
+            }
+        </style>
+    </head>
+
+    <body>
+        <div class="card">
+            <h2>🏠 Price Predictor</h2>
+
+            <input id="MedInc" placeholder="Median Income">
+            <input id="HouseAge" placeholder="House Age">
+            <input id="AveRooms" placeholder="Average Rooms">
+            <input id="AveBedrms" placeholder="Bedrooms">
+            <input id="Population" placeholder="Population">
+            <input id="AveOccup" placeholder="Occupancy">
+            <input id="Latitude" placeholder="Latitude">
+            <input id="Longitude" placeholder="Longitude">
+
+            <button onclick="predict()">Predict</button>
+
+            <div id="result"></div>
         </div>
+
+        <script>
+        async function predict() {
+            const resultDiv = document.getElementById("result");
+
+            resultDiv.innerHTML = "⏳ Predicting...";
+            resultDiv.className = "";
+
+            try {
+                const data = {
+                    MedInc: parseFloat(document.getElementById("MedInc").value),
+                    HouseAge: parseFloat(document.getElementById("HouseAge").value),
+                    AveRooms: parseFloat(document.getElementById("AveRooms").value),
+                    AveBedrms: parseFloat(document.getElementById("AveBedrms").value),
+                    Population: parseFloat(document.getElementById("Population").value),
+                    AveOccup: parseFloat(document.getElementById("AveOccup").value),
+                    Latitude: parseFloat(document.getElementById("Latitude").value),
+                    Longitude: parseFloat(document.getElementById("Longitude").value)
+                };
+
+                // validation
+                for (let key in data) {
+                    if (isNaN(data[key])) {
+                        throw new Error("Please enter valid numbers in all fields");
+                    }
+                }
+
+                const response = await fetch("/predict", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+
+                resultDiv.innerHTML = "💰 Price: " + result.predicted_house_value.toFixed(2);
+                resultDiv.className = "success";
+
+            } catch (err) {
+                resultDiv.innerHTML = "❌ " + err.message;
+                resultDiv.className = "error";
+            }
+        }
+        </script>
+
     </body>
     </html>
     """
