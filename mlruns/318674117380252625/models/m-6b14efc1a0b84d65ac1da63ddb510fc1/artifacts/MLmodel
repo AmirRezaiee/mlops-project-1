@@ -1,0 +1,23 @@
+artifact_path: file:C:/Users/amir.darsara/OneDrive - Hanwha Q CELLS/Desktop/Project/mlops-project-1-main/mlruns/318674117380252625/models/m-6b14efc1a0b84d65ac1da63ddb510fc1/artifacts
+flavors:
+  python_function:
+    env:
+      conda: conda.yaml
+      virtualenv: python_env.yaml
+    loader_module: mlflow.sklearn
+    model_path: model.pkl
+    predict_fn: predict
+    python_version: 3.12.10
+  sklearn:
+    code: null
+    pickled_model: model.pkl
+    serialization_format: cloudpickle
+    sklearn_version: 1.6.1
+    skops_trusted_types: null
+mlflow_version: 3.12.0
+model_id: m-6b14efc1a0b84d65ac1da63ddb510fc1
+model_size_bytes: 10214194
+model_uuid: m-6b14efc1a0b84d65ac1da63ddb510fc1
+prompts: null
+run_id: ee98c3a6582040eaa083cf4986919420
+utc_time_created: '2026-05-08 10:07:49.857423'

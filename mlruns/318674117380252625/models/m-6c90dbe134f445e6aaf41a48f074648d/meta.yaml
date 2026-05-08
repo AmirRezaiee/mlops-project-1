@@ -1,0 +1,10 @@
+artifact_location: file:C:/Users/amir.darsara/OneDrive - Hanwha Q CELLS/Desktop/Project/mlops-project-1-main/mlruns/318674117380252625/models/m-6c90dbe134f445e6aaf41a48f074648d/artifacts
+creation_timestamp: 1778233115991
+experiment_id: '318674117380252625'
+last_updated_timestamp: 1778233126118
+model_id: m-6c90dbe134f445e6aaf41a48f074648d
+model_type: null
+name: model
+source_run_id: 70b1d1c880e24b01b6cb1bb59ff58d6c
+status: 2
+status_message: null

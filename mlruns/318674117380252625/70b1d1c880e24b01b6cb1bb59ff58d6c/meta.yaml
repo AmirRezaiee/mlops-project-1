@@ -1,0 +1,14 @@
+artifact_uri: file:C:/Users/amir.darsara/OneDrive - Hanwha Q CELLS/Desktop/Project/mlops-project-1-main/mlruns/318674117380252625/70b1d1c880e24b01b6cb1bb59ff58d6c/artifacts
+end_time: 1778233126135
+entry_point_name: ''
+experiment_id: '318674117380252625'
+lifecycle_stage: active
+run_id: 70b1d1c880e24b01b6cb1bb59ff58d6c
+run_name: angry-snipe-215
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1778233114414
+status: 3
+tags: []
+user_id: amir.darsara

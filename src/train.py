@@ -1,34 +1,50 @@
-
 import pandas as pd
 from sklearn.model_selection import train_test_split
-from sklearn.linear_model import LinearRegression
-import os
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.datasets import fetch_california_housing
 import joblib
+import os
+import mlflow
+import mlflow.sklearn
 
-# 1. ساخت دیتای ساده
-data = {
-    "size": [50, 60, 80, 100, 120, 150, 200],
-    "price": [150, 180, 240, 300, 360, 450, 600]
-}
+mlflow.set_tracking_uri("file:./mlruns")
+mlflow.set_experiment("housing-price-prediction")
 
-df = pd.DataFrame(data)
+mlflow.start_run()
 
-# 2. تقسیم داده
-X = df[["size"]]
-y = df["price"]
+# load dataset
+data = fetch_california_housing(as_frame=True)
+df = data.frame
 
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
+X = df.drop("MedHouseVal", axis=1)
+y = df["MedHouseVal"]
 
-# 3. ساخت مدل
-model = LinearRegression()
+# split
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42
+)
+
+# model (upgrade)
+model = RandomForestRegressor(
+    n_estimators=100,
+    max_depth=10,
+    random_state=42
+)
+
 model.fit(X_train, y_train)
 
-# 4. ارزیابی ساده
+# evaluation
 score = model.score(X_test, y_test)
 print(f"Model Score: {score}")
 
-# 5. ذخیره مدل
-os.makedirs("../models", exist_ok=True)
-joblib.dump(model, "../models/model.pkl")
+mlflow.log_metric("r2_score", score)
 
-print("Model saved in models/model.pkl")
+# save
+os.makedirs("models", exist_ok=True)
+joblib.dump(model, "models/model.pkl")
+
+mlflow.sklearn.log_model(model, "model")
+
+mlflow.end_run()
+
+print("Model upgraded and saved")

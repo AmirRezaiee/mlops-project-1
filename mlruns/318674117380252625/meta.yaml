@@ -1,0 +1,8 @@
+artifact_location: file:C:/Users/amir.darsara/OneDrive - Hanwha Q CELLS/Desktop/Project/mlops-project-1-main/mlruns/318674117380252625
+creation_time: 1778233114085
+experiment_id: '318674117380252625'
+last_update_time: 1778233114085
+lifecycle_stage: active
+name: housing-price-prediction
+trace_location: null
+workspace: default
