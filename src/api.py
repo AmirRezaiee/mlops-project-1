@@ -27,6 +27,18 @@ class InputData(BaseModel):
 # =========================
 # API Endpoint
 # =========================
+@app.post("/predict")
+def predict_api(data: InputData):
+    features = np.array([[
+        data.MedInc,
+        data.HouseAge,
+        data.AveRooms,
+        data.AveBedrms,
+        data.Population,
+        data.AveOccup,
+        data.Latitude,
+        data.Longitude
+    ]])
 
     prediction = model.predict(features)[0]
 
@@ -39,14 +51,14 @@ class InputData(BaseModel):
 
 
 # =========================
-# UI Level 2 (Frontend)
+# UI Level 3 (Frontend)
 # =========================
 @app.get("/", response_class=HTMLResponse)
 def form():
     return """
     <html>
     <head>
-        <title>House Price Predictor</title>
+        <title>Price Predictor</title>
 
         <style>
             body {
@@ -78,6 +90,11 @@ def form():
                 margin: 6px 0;
                 border-radius: 6px;
                 border: 1px solid #ccc;
+            }
+
+            input:focus {
+                border-color: #667eea;
+                outline: none;
             }
 
             button {
@@ -113,6 +130,27 @@ def form():
                 background: #f8d7da;
                 color: #721c24;
             }
+
+            .spinner {
+                border: 4px solid #f3f3f3;
+                border-top: 4px solid #667eea;
+                border-radius: 50%;
+                width: 20px;
+                height: 20px;
+                animation: spin 1s linear infinite;
+                margin: auto;
+            }
+
+            @keyframes spin {
+                0% { transform: rotate(0deg); }
+                100% { transform: rotate(360deg); }
+            }
+
+            .tooltip {
+                font-size: 12px;
+                color: #666;
+                margin-bottom: 5px;
+            }
         </style>
     </head>
 
@@ -120,13 +158,28 @@ def form():
         <div class="card">
             <h2>🏠 Price Predictor</h2>
 
+            <div class="tooltip">Median Income (higher = expensive area)</div>
             <input id="MedInc" placeholder="Median Income">
+
+            <div class="tooltip">House Age (years)</div>
             <input id="HouseAge" placeholder="House Age">
+
+            <div class="tooltip">Average number of rooms</div>
             <input id="AveRooms" placeholder="Average Rooms">
+
+            <div class="tooltip">Average bedrooms</div>
             <input id="AveBedrms" placeholder="Bedrooms">
+
+            <div class="tooltip">Population in area</div>
             <input id="Population" placeholder="Population">
+
+            <div class="tooltip">Average occupancy</div>
             <input id="AveOccup" placeholder="Occupancy">
+
+            <div class="tooltip">Latitude (location)</div>
             <input id="Latitude" placeholder="Latitude">
+
+            <div class="tooltip">Longitude (location)</div>
             <input id="Longitude" placeholder="Longitude">
 
             <button onclick="predict()">Predict</button>
@@ -135,10 +188,14 @@ def form():
         </div>
 
         <script>
+        function formatCurrency(num) {
+            return "$" + num.toLocaleString(undefined, {minimumFractionDigits: 2});
+        }
+
         async function predict() {
             const resultDiv = document.getElementById("result");
 
-            resultDiv.innerHTML = "⏳ Predicting...";
+            resultDiv.innerHTML = "<div class='spinner'></div>";
             resultDiv.className = "";
 
             try {
@@ -156,7 +213,10 @@ def form():
                 // validation
                 for (let key in data) {
                     if (isNaN(data[key])) {
-                        throw new Error("Please enter valid numbers in all fields");
+                        throw new Error("All fields must be numbers");
+                    }
+                    if (data[key] < 0) {
+                        throw new Error("Values must be positive");
                     }
                 }
 
@@ -170,7 +230,7 @@ def form():
 
                 const result = await response.json();
 
-                resultDiv.innerHTML = "💰 Price: " + result.predicted_house_value.toFixed(2);
+                resultDiv.innerHTML = "💰 Price: " + formatCurrency(result.predicted_house_value);
                 resultDiv.className = "success";
 
             } catch (err) {
