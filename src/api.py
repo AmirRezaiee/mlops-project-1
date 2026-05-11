@@ -6,13 +6,9 @@ import numpy as np
 
 app = FastAPI()
 
-# load model
 model = joblib.load("models/model.pkl")
 
 
-# =========================
-# API Input (JSON)
-# =========================
 class InputData(BaseModel):
     MedInc: float
     HouseAge: float
@@ -24,9 +20,6 @@ class InputData(BaseModel):
     Longitude: float
 
 
-# =========================
-# API Endpoint
-# =========================
 @app.post("/predict")
 def predict_api(data: InputData):
     features = np.array([[
@@ -41,18 +34,11 @@ def predict_api(data: InputData):
     ]])
 
     prediction = model.predict(features)[0]
-
-    # جلوگیری از مقدار منفی
     prediction = max(0, prediction)
 
-    return {
-        "predicted_house_value": float(prediction)
-    }
+    return {"predicted_house_value": float(prediction)}
 
 
-# =========================
-# UI Level 3 (Frontend)
-# =========================
 @app.get("/", response_class=HTMLResponse)
 def form():
     return """
@@ -66,9 +52,10 @@ def form():
                 background: linear-gradient(135deg, #667eea, #764ba2);
                 display: flex;
                 justify-content: center;
-                align-items: center;
-                height: 100vh;
+                align-items: flex-start;
+                min-height: 100vh;
                 margin: 0;
+                padding: 30px;
             }
 
             .card {
@@ -210,7 +197,6 @@ def form():
                     Longitude: parseFloat(document.getElementById("Longitude").value)
                 };
 
-                // validation
                 for (let key in data) {
                     if (isNaN(data[key])) {
                         throw new Error("All fields must be numbers");
@@ -222,9 +208,7 @@ def form():
 
                 const response = await fetch("/predict", {
                     method: "POST",
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
+                    headers: {"Content-Type": "application/json"},
                     body: JSON.stringify(data)
                 });
 
