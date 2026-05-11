@@ -8,7 +8,7 @@ import os
 app = FastAPI()
 
 # ------------------------
-# FIX PATH (خیلی مهم برای Render)
+# FIX PATH برای Render
 # ------------------------
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 model_path = os.path.join(BASE_DIR, "..", "models", "model.pkl")
@@ -53,7 +53,7 @@ def predict_api(data: InputData):
 
 
 # ------------------------
-# UI (Dark Mode + Chart)
+# UI (Dark + Chart + UX Fix)
 # ------------------------
 @app.get("/", response_class=HTMLResponse)
 def form():
@@ -80,7 +80,7 @@ def form():
                 background: #1e1e1e;
                 padding: 25px;
                 border-radius: 12px;
-                width: 600px;
+                width: 650px;
                 box-shadow: 0px 10px 30px rgba(0,0,0,0.5);
             }
 
@@ -142,14 +142,14 @@ def form():
             <h2>🌙 Price Predictor</h2>
 
             <div class="grid">
-                <input id="MedInc" placeholder="Median Income">
-                <input id="HouseAge" placeholder="House Age">
-                <input id="AveRooms" placeholder="Rooms">
-                <input id="AveBedrms" placeholder="Bedrooms">
-                <input id="Population" placeholder="Population">
-                <input id="AveOccup" placeholder="Occupancy">
-                <input id="Latitude" placeholder="Latitude">
-                <input id="Longitude" placeholder="Longitude">
+                <input id="MedInc" placeholder="e.g. 5.0">
+                <input id="HouseAge" placeholder="e.g. 20">
+                <input id="AveRooms" placeholder="e.g. 6">
+                <input id="AveBedrms" placeholder="e.g. 1">
+                <input id="Population" placeholder="e.g. 1000">
+                <input id="AveOccup" placeholder="e.g. 3">
+                <input id="Latitude" placeholder="e.g. 34.2">
+                <input id="Longitude" placeholder="e.g. -118.4">
             </div>
 
             <button onclick="predict()">Predict</button>
@@ -182,11 +182,22 @@ def form():
                     Longitude: parseFloat(document.getElementById("Longitude").value)
                 };
 
+                for (let key in data) {
+                    if (isNaN(data[key])) {
+                        throw new Error("All fields must be numbers");
+                    }
+                }
+
                 const response = await fetch("/predict", {
                     method: "POST",
                     headers: {"Content-Type": "application/json"},
                     body: JSON.stringify(data)
                 });
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error("API Error: " + errorText);
+                }
 
                 const result = await response.json();
 
@@ -209,7 +220,7 @@ def form():
                 });
 
             } catch (err) {
-                resultDiv.innerHTML = "❌ Error";
+                resultDiv.innerHTML = "❌ " + err.message;
             }
         }
         </script>
