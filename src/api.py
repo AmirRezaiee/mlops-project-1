@@ -1,3 +1,60 @@
+from fastapi import FastAPI
+from fastapi.responses import HTMLResponse
+from pydantic import BaseModel
+import joblib
+import numpy as np
+import os
+
+app = FastAPI()
+
+# ------------------------
+# FIX PATH (خیلی مهم برای Render)
+# ------------------------
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+model_path = os.path.join(BASE_DIR, "..", "models", "model.pkl")
+
+model = joblib.load(model_path)
+
+
+# ------------------------
+# API Input
+# ------------------------
+class InputData(BaseModel):
+    MedInc: float
+    HouseAge: float
+    AveRooms: float
+    AveBedrms: float
+    Population: float
+    AveOccup: float
+    Latitude: float
+    Longitude: float
+
+
+# ------------------------
+# API Endpoint
+# ------------------------
+@app.post("/predict")
+def predict_api(data: InputData):
+    features = np.array([[
+        data.MedInc,
+        data.HouseAge,
+        data.AveRooms,
+        data.AveBedrms,
+        data.Population,
+        data.AveOccup,
+        data.Latitude,
+        data.Longitude
+    ]])
+
+    prediction = model.predict(features)[0]
+    prediction = max(0, prediction)
+
+    return {"predicted_house_value": float(prediction)}
+
+
+# ------------------------
+# UI (Dark Mode + Chart)
+# ------------------------
 @app.get("/", response_class=HTMLResponse)
 def form():
     return """
@@ -23,29 +80,22 @@ def form():
                 background: #1e1e1e;
                 padding: 25px;
                 border-radius: 12px;
-                width: 650px;
+                width: 600px;
                 box-shadow: 0px 10px 30px rgba(0,0,0,0.5);
-                animation: fadeIn 0.6s ease-in-out;
-            }
-
-            @keyframes fadeIn {
-                from { opacity: 0; transform: translateY(20px); }
-                to { opacity: 1; transform: translateY(0); }
             }
 
             h2 {
                 text-align: center;
-                margin-bottom: 20px;
             }
 
             .grid {
                 display: grid;
                 grid-template-columns: 1fr 1fr;
                 gap: 10px;
+                margin-top: 10px;
             }
 
             input {
-                width: 100%;
                 padding: 10px;
                 border-radius: 6px;
                 border: none;
@@ -64,18 +114,10 @@ def form():
                 cursor: pointer;
             }
 
-            button:hover {
-                background: #45a049;
-            }
-
             #result {
                 margin-top: 15px;
                 text-align: center;
                 font-weight: bold;
-            }
-
-            canvas {
-                margin-top: 20px;
             }
 
             .spinner {
@@ -97,7 +139,7 @@ def form():
 
     <body>
         <div class="card">
-            <h2>🌙 Price Predictor (Dark Mode)</h2>
+            <h2>🌙 Price Predictor</h2>
 
             <div class="grid">
                 <input id="MedInc" placeholder="Median Income">
@@ -150,7 +192,6 @@ def form():
 
                 resultDiv.innerHTML = "💰 " + formatCurrency(result.predicted_house_value);
 
-                // chart
                 const ctx = document.getElementById("chart").getContext("2d");
 
                 if (chart) chart.destroy();
