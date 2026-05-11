@@ -5,10 +5,13 @@ def form():
     <head>
         <title>Price Predictor</title>
 
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
         <style>
             body {
                 font-family: Arial;
-                background: linear-gradient(135deg, #667eea, #764ba2);
+                background: #121212;
+                color: white;
                 display: flex;
                 justify-content: center;
                 align-items: center;
@@ -17,11 +20,17 @@ def form():
             }
 
             .card {
-                background: white;
+                background: #1e1e1e;
                 padding: 25px;
                 border-radius: 12px;
-                width: 600px;
-                box-shadow: 0px 10px 30px rgba(0,0,0,0.25);
+                width: 650px;
+                box-shadow: 0px 10px 30px rgba(0,0,0,0.5);
+                animation: fadeIn 0.6s ease-in-out;
+            }
+
+            @keyframes fadeIn {
+                from { opacity: 0; transform: translateY(20px); }
+                to { opacity: 1; transform: translateY(0); }
             }
 
             h2 {
@@ -39,37 +48,39 @@ def form():
                 width: 100%;
                 padding: 10px;
                 border-radius: 6px;
-                border: 1px solid #ccc;
+                border: none;
+                background: #2c2c2c;
+                color: white;
             }
 
             button {
                 width: 100%;
                 padding: 12px;
                 margin-top: 15px;
-                background: #667eea;
+                background: #4CAF50;
                 color: white;
                 border: none;
                 border-radius: 6px;
                 cursor: pointer;
-                font-size: 16px;
+            }
+
+            button:hover {
+                background: #45a049;
             }
 
             #result {
                 margin-top: 15px;
-                padding: 10px;
                 text-align: center;
                 font-weight: bold;
-                border-radius: 6px;
             }
 
-            .success {
-                background: #d4edda;
-                color: #155724;
+            canvas {
+                margin-top: 20px;
             }
 
             .spinner {
-                border: 4px solid #f3f3f3;
-                border-top: 4px solid #667eea;
+                border: 4px solid #333;
+                border-top: 4px solid #4CAF50;
                 border-radius: 50%;
                 width: 20px;
                 height: 20px;
@@ -86,18 +97,15 @@ def form():
 
     <body>
         <div class="card">
-            <h2>🏠 Price Predictor</h2>
+            <h2>🌙 Price Predictor (Dark Mode)</h2>
 
             <div class="grid">
                 <input id="MedInc" placeholder="Median Income">
                 <input id="HouseAge" placeholder="House Age">
-
-                <input id="AveRooms" placeholder="Average Rooms">
+                <input id="AveRooms" placeholder="Rooms">
                 <input id="AveBedrms" placeholder="Bedrooms">
-
                 <input id="Population" placeholder="Population">
                 <input id="AveOccup" placeholder="Occupancy">
-
                 <input id="Latitude" placeholder="Latitude">
                 <input id="Longitude" placeholder="Longitude">
             </div>
@@ -105,9 +113,13 @@ def form():
             <button onclick="predict()">Predict</button>
 
             <div id="result"></div>
+
+            <canvas id="chart"></canvas>
         </div>
 
         <script>
+        let chart;
+
         function formatCurrency(num) {
             return "$" + num.toLocaleString(undefined, {minimumFractionDigits: 2});
         }
@@ -136,15 +148,30 @@ def form():
 
                 const result = await response.json();
 
-                resultDiv.innerHTML = "💰 Price: " + formatCurrency(result.predicted_house_value);
-                resultDiv.className = "success";
+                resultDiv.innerHTML = "💰 " + formatCurrency(result.predicted_house_value);
+
+                // chart
+                const ctx = document.getElementById("chart").getContext("2d");
+
+                if (chart) chart.destroy();
+
+                chart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: ["Prediction"],
+                        datasets: [{
+                            label: "House Price",
+                            data: [result.predicted_house_value],
+                            backgroundColor: "#4CAF50"
+                        }]
+                    }
+                });
 
             } catch (err) {
                 resultDiv.innerHTML = "❌ Error";
             }
         }
         </script>
-
     </body>
     </html>
     """
