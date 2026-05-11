@@ -1,44 +1,3 @@
-from fastapi import FastAPI
-from fastapi.responses import HTMLResponse
-from pydantic import BaseModel
-import joblib
-import numpy as np
-
-app = FastAPI()
-
-model = joblib.load("models/model.pkl")
-
-
-class InputData(BaseModel):
-    MedInc: float
-    HouseAge: float
-    AveRooms: float
-    AveBedrms: float
-    Population: float
-    AveOccup: float
-    Latitude: float
-    Longitude: float
-
-
-@app.post("/predict")
-def predict_api(data: InputData):
-    features = np.array([[
-        data.MedInc,
-        data.HouseAge,
-        data.AveRooms,
-        data.AveBedrms,
-        data.Population,
-        data.AveOccup,
-        data.Latitude,
-        data.Longitude
-    ]])
-
-    prediction = model.predict(features)[0]
-    prediction = max(0, prediction)
-
-    return {"predicted_house_value": float(prediction)}
-
-
 @app.get("/", response_class=HTMLResponse)
 def form():
     return """
@@ -52,17 +11,16 @@ def form():
                 background: linear-gradient(135deg, #667eea, #764ba2);
                 display: flex;
                 justify-content: center;
-                align-items: flex-start;
-                min-height: 100vh;
+                align-items: center;
+                height: 100vh;
                 margin: 0;
-                padding: 30px;
             }
 
             .card {
                 background: white;
-                padding: 30px;
+                padding: 25px;
                 border-radius: 12px;
-                width: 360px;
+                width: 600px;
                 box-shadow: 0px 10px 30px rgba(0,0,0,0.25);
             }
 
@@ -71,33 +29,29 @@ def form():
                 margin-bottom: 20px;
             }
 
+            .grid {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 10px;
+            }
+
             input {
                 width: 100%;
                 padding: 10px;
-                margin: 6px 0;
                 border-radius: 6px;
                 border: 1px solid #ccc;
-            }
-
-            input:focus {
-                border-color: #667eea;
-                outline: none;
             }
 
             button {
                 width: 100%;
                 padding: 12px;
-                margin-top: 10px;
+                margin-top: 15px;
                 background: #667eea;
                 color: white;
                 border: none;
                 border-radius: 6px;
                 cursor: pointer;
                 font-size: 16px;
-            }
-
-            button:hover {
-                background: #5a67d8;
             }
 
             #result {
@@ -111,11 +65,6 @@ def form():
             .success {
                 background: #d4edda;
                 color: #155724;
-            }
-
-            .error {
-                background: #f8d7da;
-                color: #721c24;
             }
 
             .spinner {
@@ -132,12 +81,6 @@ def form():
                 0% { transform: rotate(0deg); }
                 100% { transform: rotate(360deg); }
             }
-
-            .tooltip {
-                font-size: 12px;
-                color: #666;
-                margin-bottom: 5px;
-            }
         </style>
     </head>
 
@@ -145,29 +88,19 @@ def form():
         <div class="card">
             <h2>🏠 Price Predictor</h2>
 
-            <div class="tooltip">Median Income (higher = expensive area)</div>
-            <input id="MedInc" placeholder="Median Income">
+            <div class="grid">
+                <input id="MedInc" placeholder="Median Income">
+                <input id="HouseAge" placeholder="House Age">
 
-            <div class="tooltip">House Age (years)</div>
-            <input id="HouseAge" placeholder="House Age">
+                <input id="AveRooms" placeholder="Average Rooms">
+                <input id="AveBedrms" placeholder="Bedrooms">
 
-            <div class="tooltip">Average number of rooms</div>
-            <input id="AveRooms" placeholder="Average Rooms">
+                <input id="Population" placeholder="Population">
+                <input id="AveOccup" placeholder="Occupancy">
 
-            <div class="tooltip">Average bedrooms</div>
-            <input id="AveBedrms" placeholder="Bedrooms">
-
-            <div class="tooltip">Population in area</div>
-            <input id="Population" placeholder="Population">
-
-            <div class="tooltip">Average occupancy</div>
-            <input id="AveOccup" placeholder="Occupancy">
-
-            <div class="tooltip">Latitude (location)</div>
-            <input id="Latitude" placeholder="Latitude">
-
-            <div class="tooltip">Longitude (location)</div>
-            <input id="Longitude" placeholder="Longitude">
+                <input id="Latitude" placeholder="Latitude">
+                <input id="Longitude" placeholder="Longitude">
+            </div>
 
             <button onclick="predict()">Predict</button>
 
@@ -181,9 +114,7 @@ def form():
 
         async function predict() {
             const resultDiv = document.getElementById("result");
-
             resultDiv.innerHTML = "<div class='spinner'></div>";
-            resultDiv.className = "";
 
             try {
                 const data = {
@@ -197,15 +128,6 @@ def form():
                     Longitude: parseFloat(document.getElementById("Longitude").value)
                 };
 
-                for (let key in data) {
-                    if (isNaN(data[key])) {
-                        throw new Error("All fields must be numbers");
-                    }
-                    if (data[key] < 0) {
-                        throw new Error("Values must be positive");
-                    }
-                }
-
                 const response = await fetch("/predict", {
                     method: "POST",
                     headers: {"Content-Type": "application/json"},
@@ -218,8 +140,7 @@ def form():
                 resultDiv.className = "success";
 
             } catch (err) {
-                resultDiv.innerHTML = "❌ " + err.message;
-                resultDiv.className = "error";
+                resultDiv.innerHTML = "❌ Error";
             }
         }
         </script>
