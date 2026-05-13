@@ -33,16 +33,17 @@ Note:
 
 ## 🏗️ Project Structure
 
+```bash
 mlops-project-1/
-│── src/
-│── models/
-│── dags/
-│── scripts/
-│── docker-compose.yml
-│── requirements.txt
-│── README.md
-
----
+│
+├── src/
+├── models/
+├── dags/
+├── scripts/
+├── docker-compose.yml
+├── requirements.txt
+└── README.md
+```
 
 ## ⚙️ How It Works
 
